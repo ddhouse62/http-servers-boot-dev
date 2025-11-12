@@ -33,14 +33,11 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/app/", apiCfg.middlewareMetricsInc(handler))
-
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
-
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
-
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
-
 	mux.HandleFunc("POST /api/validate_chirp", handlerChirpValidator)
+	mux.HandleFunc("POST /api/users", apiCfg.handleCreateUser)
 
 	srv := &http.Server{
 		Handler: mux,
