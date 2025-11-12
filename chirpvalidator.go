@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"slices"
+	"strings"
 )
 
 func handlerChirpValidator(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +15,7 @@ func handlerChirpValidator(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type returnVals struct {
-		Valid bool `json:"valid"`
+		CleanedBody string `json:"cleaned_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -27,12 +29,30 @@ func handlerChirpValidator(w http.ResponseWriter, r *http.Request) {
 
 	const maxChirpLength = 140
 
+	cleaned_body := profanityReplacement(params.Body)
+
 	if len(params.Body) > maxChirpLength {
 		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
 		return
 	}
 	respondWithJSON(w, http.StatusOK, returnVals{
-		Valid: true,
+		CleanedBody: cleaned_body,
 	})
+
+}
+
+func profanityReplacement(msg string) string {
+	words := strings.Split(msg, " ")
+
+	profanity := []string{"kerfuffle", "sharbert", "fornax"}
+
+	for i := 0; i < len(words); i++ {
+		if slices.Contains(profanity, strings.ToLower(words[i])) {
+			words[i] = "****"
+		}
+	}
+
+	cleaned_words := strings.Join(words, " ")
+	return cleaned_words
 
 }
