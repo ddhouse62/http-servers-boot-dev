@@ -7,7 +7,7 @@ import (
 )
 
 func handlerReadiness(w http.ResponseWriter, req *http.Request) {
-	if req.URL.Path != "/healthz" {
+	if req.URL.Path != "/api/healthz" {
 		http.NotFound(w, req)
 		return
 	}
