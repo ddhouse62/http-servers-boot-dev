@@ -9,7 +9,7 @@ import (
 func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
 	cfg.fileserverHits.Store(0)
 
-	if r.URL.Path != "/api/reset" {
+	if r.URL.Path != "/admin/reset" {
 		http.NotFound(w, r)
 		return
 	}
