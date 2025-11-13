@@ -13,20 +13,19 @@ import (
 )
 
 type Chirp struct {
-	ID uuid.UUID `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Body string `json:"body"`
-	UserID uuid.UUID `json:"user_id"`
+	Body      string    `json:"body"`
+	UserID    uuid.UUID `json:"user_id"`
 }
 
 func (cfg *apiConfig) handlerCreateChirps(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
-		Body string `json:"body"`
+		Body   string    `json:"body"`
 		UserID uuid.UUID `json:"user_id"`
 	}
-
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
@@ -46,10 +45,8 @@ func (cfg *apiConfig) handlerCreateChirps(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-
-
 	chirp, err := cfg.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{
-		Body: cleaned_body,
+		Body:   cleaned_body,
 		UserID: params.UserID,
 	})
 	if err != nil {
@@ -58,15 +55,13 @@ func (cfg *apiConfig) handlerCreateChirps(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, Chirp {
-		ID: chirp.ID,
+	respondWithJSON(w, http.StatusCreated, Chirp{
+		ID:        chirp.ID,
 		CreatedAt: chirp.CreatedAt,
 		UpdatedAt: chirp.CreatedAt,
-		Body: chirp.Body,
-		UserID: chirp.UserID,
+		Body:      chirp.Body,
+		UserID:    chirp.UserID,
 	})
-	
-
 
 }
 
@@ -83,7 +78,26 @@ func profanityReplacement(msg string) string {
 
 	cleaned_words := strings.Join(words, " ")
 	return cleaned_words
-
 }
 
+func (cfg *apiConfig) handlerGetAllChirps(w http.ResponseWriter, r *http.Request) {
+	chirps, err := cfg.dbQueries.GetAllChirps(r.Context())
+	if err != nil {
+		log.Printf("Error obtaining chirps")
+		respondWithError(w, http.StatusInternalServerError, "Error obtaining requested chirps", err)
+		return
+	}
+	response := []Chirp{}
+	for _, chirp := range chirps {
+		response = append(response, Chirp{
+			ID:        chirp.ID,
+			CreatedAt: chirp.CreatedAt,
+			UpdatedAt: chirp.UpdatedAt,
+			Body:      chirp.Body,
+			UserID:    chirp.UserID,
+		})
+	}
 
+	respondWithJSON(w, http.StatusOK, response)
+
+}
